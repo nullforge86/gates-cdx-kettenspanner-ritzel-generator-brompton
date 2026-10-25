@@ -6,9 +6,9 @@
 
 ![FreeCAD](https://img.shields.io/badge/FreeCAD-1.1%2B-blue) ![Python](https://img.shields.io/badge/Python-GTK%20%7C%20PySide6-green) ![Web](https://img.shields.io/badge/Web-Browser-orange) ![Android](https://img.shields.io/badge/Android-APK-brightgreen)
 
-[![⚙ Open Configurator](https://img.shields.io/badge/%E2%9A%99%20Open%20Configurator-Live--Preview%20in%20Browser-blue?style=for-the-badge)](https://kaysiebke-cell.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/)
+[![⚙ Open Configurator](https://img.shields.io/badge/%E2%9A%99%20Open%20Configurator-Live--Preview%20in%20Browser-blue?style=for-the-badge)](https://nullforge86.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/)
 
-[![📱 Android app](https://img.shields.io/badge/%F0%9F%93%B1%20Android%20app-download%20APK-brightgreen?style=for-the-badge)](https://github.com/kaysiebke-cell/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/app/ritzel-generator.apk)
+[![📱 Android app](https://img.shields.io/badge/%F0%9F%93%B1%20Android%20app-download%20APK-brightgreen?style=for-the-badge)](https://github.com/nullforge86/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/app/ritzel-generator.apk)
 
 The app ships everything and works offline – [installation guide](APK-HERUNTERLADEN.md) (German).
 
@@ -50,22 +50,22 @@ This tool generates parametric **idler pulleys and guide sprockets for the origi
 
 ## Quick start
 
-1. **Web:** [Open the configurator](https://kaysiebke-cell.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/) – enter values, download STL or STEP.
+1. **Web:** [Open the configurator](https://nullforge86.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/) – enter values, download STL or STEP.
 2. **Linux app:** run `linux/bauen-deb.sh`, then `sudo apt install ./linux/dist/ritzel-generator_*_all.deb` → "Ritzel-Generator" in the menu. → [Details](docs/en/linux-app.md)
-3. **Android:** [download the APK](https://github.com/kaysiebke-cell/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/app/ritzel-generator.apk) and install it. → [Details](docs/en/android.md)
+3. **Android:** [download the APK](https://github.com/nullforge86/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/app/ritzel-generator.apk) and install it. → [Details](docs/en/android.md)
 4. **FreeCAD:** copy the project folder, run `freecad/main.py` as a macro – the panel "Zahnrad Setup" docks on the right. → [Details](docs/en/freecad.md)
 
 ---
 
 ## Highlights
 
-* **Fully parametric:** tooth count (**12–19**), pressure angle, pitch, tip/root radius and tooth depth freely adjustable.
-* **Thought-out geometry:** central web as belt guide (width and Ø adjustable, Ø 0 = automatic), side debris pockets, bore and steps for the tensioner's ball bearings.
-* **Spokes to save material:** openings in the web, straight or swept – about a quarter less material at 19 teeth. → [Spokes](docs/en/speichen.md)
-* **Print-ready files:** STL meshes are closed (slicer-ready without repair), STEP with exact CAD fillets.
-* **The idler roller and the belt guard** can be generated too.
-* **Four versions, one source:** `params.json` is the single source for fields and defaults; `npm test` and `npm run test:dicht` keep web and CAD identical and check the meshes.
-* **Proven in practice:** PA12-CF in daily use, over 2800 km. → [3D printing](docs/en/3d-druck.md)
+- **Fully parametric:** tooth count (**12–19**), pressure angle, pitch, tip/root radius and tooth depth freely adjustable.
+- **Thought-out geometry:** central web as belt guide (width and Ø adjustable, Ø 0 = automatic), side debris pockets, bore and steps for the tensioner's ball bearings.
+- **Spokes to save material:** openings in the web, straight or swept – about a quarter less material at 19 teeth. → [Spokes](docs/en/speichen.md)
+- **Print-ready files:** STL meshes are closed (slicer-ready without repair), STEP with exact CAD fillets.
+- **The idler roller and the belt guard** can be generated too.
+- **Four versions, one source:** `params.json` is the single source for fields and defaults; `npm test` and `npm run test:dicht` keep web and CAD identical and check the meshes.
+- **Proven in practice:** PA12-CF in daily use, over 2800 km. → [3D printing](docs/en/3d-druck.md)
 
 ---
 
