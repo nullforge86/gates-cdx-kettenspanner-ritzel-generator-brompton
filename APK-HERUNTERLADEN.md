@@ -2,13 +2,13 @@
 
 ## ⬇️ Direkt herunterladen (immer die neueste Fassung)
 
-**➡️ [ritzel-generator.apk herunterladen](https://github.com/kaysiebke-cell/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/app/ritzel-generator.apk)**
+**➡️ [ritzel-generator.apk herunterladen](https://github.com/nullforge86/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/app/ritzel-generator.apk)**
 
 Diese Datei wird bei **jeder Änderung automatisch aktualisiert** — der Link
 bleibt aber immer derselbe. Am besten im Handy-Browser als **Lesezeichen**
 speichern.
 
-*(Falls der Link mal klemmt: [alle Fassungen ansehen](https://github.com/kaysiebke-cell/gates-cdx-kettenspanner-ritzel-generator-brompton/releases) → Release „Ritzel-Generator (Android-App)" → unter „Assets" auf `ritzel-generator.apk`.)*
+*(Falls der Link mal klemmt: [alle Fassungen ansehen](https://github.com/nullforge86/gates-cdx-kettenspanner-ritzel-generator-brompton/releases) → Release „Ritzel-Generator (Android-App)" → unter „Assets" auf `ritzel-generator.apk`.)*
 
 ## 📲 Installieren — 3 Schritte
 
@@ -78,4 +78,4 @@ Die fertige Datei liegt dann unter
 
 ## Ohne Installation: im Browser
 
-Geht auch ohne APK: <https://kaysiebke-cell.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/>
+Geht auch ohne APK: <https://nullforge86.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/>

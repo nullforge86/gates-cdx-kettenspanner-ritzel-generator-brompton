@@ -8,7 +8,7 @@
 
 The same application as an **installable app** for your phone. It ships everything and works offline.
 
-**Download:** [ritzel-generator.apk](https://github.com/kaysiebke-cell/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/app/ritzel-generator.apk) – the link stays the same for every new version.
+**Download:** [ritzel-generator.apk](https://github.com/nullforge86/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/app/ritzel-generator.apk) – the link stays the same for every new version.
 
 **Install:**
 

@@ -59,13 +59,13 @@ This tool generates parametric **idler pulleys and guide sprockets for the origi
 
 ## Highlights
 
-- **Fully parametric:** tooth count (**12–19**), pressure angle, pitch, tip/root radius and tooth depth freely adjustable.
-- **Thought-out geometry:** central web as belt guide (width and Ø adjustable, Ø 0 = automatic), side debris pockets, bore and steps for the tensioner's ball bearings.
-- **Spokes to save material:** openings in the web, straight or swept – about a quarter less material at 19 teeth. → [Spokes](docs/en/speichen.md)
-- **Print-ready files:** STL meshes are closed (slicer-ready without repair), STEP with exact CAD fillets.
-- **The idler roller and the belt guard** can be generated too.
-- **Four versions, one source:** `params.json` is the single source for fields and defaults; `npm test` and `npm run test:dicht` keep web and CAD identical and check the meshes.
-- **Proven in practice:** PA12-CF in daily use, over 2800 km. → [3D printing](docs/en/3d-druck.md)
+* **Fully parametric:** tooth count (**12–19**), pressure angle, pitch, tip/root radius and tooth depth freely adjustable.
+* **Thought-out geometry:** central web as belt guide (width and Ø adjustable, Ø 0 = automatic), side debris pockets, bore and steps for the tensioner's ball bearings.
+* **Spokes to save material:** openings in the web, straight or swept – about a quarter less material at 19 teeth. → [Spokes](docs/en/speichen.md)
+* **Print-ready files:** STL meshes are closed (slicer-ready without repair), STEP with exact CAD fillets.
+* **The idler roller and the belt guard** can be generated too.
+* **Four versions, one source:** `params.json` is the single source for fields and defaults; `npm test` and `npm run test:dicht` keep web and CAD identical and check the meshes.
+* **Proven in practice:** PA12-CF in daily use, over 2800 km. → [3D printing](docs/en/3d-druck.md)
 
 ---
 

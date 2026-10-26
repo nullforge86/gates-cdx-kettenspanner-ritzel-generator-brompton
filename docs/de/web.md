@@ -6,7 +6,7 @@
 
 <img src="../../bilder/ansicht-web.png" alt="Web-Konfigurator im Browser" width="720">
 
-**Direkt im Browser, ohne Installation:** <https://kaysiebke-cell.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/>
+**Direkt im Browser, ohne Installation:** <https://nullforge86.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/>
 
 Zahnprofil, Schmutzmulden, Riemenführung, Nabe und Kugellagersitze verändern sich sofort mit deinen Werten. Die 3D-Ansicht lässt sich mit Maus oder Finger drehen und zoomen.
 

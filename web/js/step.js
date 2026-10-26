@@ -18,7 +18,7 @@ import { STEP_API } from './config.js';
 // STEP-Serie: Zähne 12–19 bei Standardwerten. Muss zur release-serie.yml passen.
 const SERIE_MIN = 12, SERIE_MAX = 19;
 const RELEASE_URL = (name) =>
-  `https://github.com/kaysiebke-cell/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/serie/${name}`;
+  `https://github.com/nullforge86/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/serie/${name}`;
 
 function istStandard(p) {
   const abw = Object.keys(p).filter(

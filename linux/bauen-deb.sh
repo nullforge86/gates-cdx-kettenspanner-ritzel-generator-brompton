@@ -46,7 +46,7 @@ Section: graphics
 Priority: optional
 Architecture: all
 Depends: python3, python3-gi, gir1.2-gtk-3.0, gir1.2-webkit2-4.1
-Maintainer: Kay Siebke <kaysiebke@gmail.com>
+Maintainer: Kay Siebke <nullforge86@gmail.com>
 Description: Gates CDX Riemenspanner-Ritzel Generator
  Eigenständige Linux-Anwendung (eigenes Fenster, läuft offline) zum
  Konfigurieren von Ritzeln und Spannrollen mit 3D-Vorschau und STL-Export.

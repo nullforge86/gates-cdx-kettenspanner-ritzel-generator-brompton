@@ -6,7 +6,7 @@
 
 <img src="../../bilder/ansicht-web.png" alt="Web configurator in the browser" width="720">
 
-**Right in the browser, no installation:** <https://kaysiebke-cell.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/>
+**Right in the browser, no installation:** <https://nullforge86.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/>
 
 Tooth profile, debris pockets, belt guide, hub and bearing seats change instantly with your values. Rotate and zoom the 3D view with mouse or finger.
 

@@ -8,7 +8,7 @@
 
 Dieselbe Anwendung als **installierbare App** fürs Handy. Sie bringt alles mit und läuft offline.
 
-**Herunterladen:** [ritzel-generator.apk](https://github.com/kaysiebke-cell/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/app/ritzel-generator.apk) – der Link bleibt bei jeder neuen Fassung derselbe.
+**Herunterladen:** [ritzel-generator.apk](https://github.com/nullforge86/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/app/ritzel-generator.apk) – der Link bleibt bei jeder neuen Fassung derselbe.
 
 **Installieren:**
 

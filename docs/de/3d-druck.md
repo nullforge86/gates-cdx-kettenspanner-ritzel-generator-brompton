@@ -4,7 +4,7 @@
 
 ---
 
-Das Ritzel live im [Online-Tool](https://kaysiebke-cell.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/) konfigurieren; dessen Tab **Druck-Empfehlungen** und der Abschnitt unten werden aus derselben Quelle (`web/js/print-data.js`) generiert und driften daher nie auseinander.
+Das Ritzel live im [Online-Tool](https://nullforge86.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/) konfigurieren; dessen Tab **Druck-Empfehlungen** und der Abschnitt unten werden aus derselben Quelle (`web/js/print-data.js`) generiert und driften daher nie auseinander.
 
 <!-- PRINT:START (auto-generiert aus web/js/print-data.js – nicht von Hand ändern; `npm run build`) -->
 > ✅ Praxiserprobt: PA12-CF hat sich im realen Dauerbetrieb bewährt und erfüllt die Anforderungen – Laufleistung 2800–2850 km in ca. 5 Monaten und weiterhin im Einsatz.

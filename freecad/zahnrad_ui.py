@@ -19,7 +19,7 @@ try:
     _WERTE_DATEI = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                 "zahnrad_werte.json")
 except NameError:   # __file__ fehlt (z.B. via exec) -> fester Pfad
-    _WERTE_DATEI = "/home/kaysiebke/Desktop/Macros/Gates CDX Ritzel Generator/zahnrad_werte.json"
+    _WERTE_DATEI = "/home/nullforge86/Desktop/Macros/Gates CDX Ritzel Generator/zahnrad_werte.json"
 
 
 class ZahnradDockPanel(QtWidgets.QDockWidget):

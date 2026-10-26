@@ -6,9 +6,9 @@
 
 ![FreeCAD](https://img.shields.io/badge/FreeCAD-1.1%2B-blue) ![Python](https://img.shields.io/badge/Python-GTK%20%7C%20PySide6-green) ![Web](https://img.shields.io/badge/Web-Browser-orange) ![Android](https://img.shields.io/badge/Android-APK-brightgreen)
 
-[![⚙ Konfigurator öffnen](https://img.shields.io/badge/%E2%9A%99%20Konfigurator%20%C3%B6ffnen-Live--Vorschau%20im%20Browser-blue?style=for-the-badge)](https://kaysiebke-cell.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/)
+[![⚙ Konfigurator öffnen](https://img.shields.io/badge/%E2%9A%99%20Konfigurator%20%C3%B6ffnen-Live--Vorschau%20im%20Browser-blue?style=for-the-badge)](https://nullforge86.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/)
 
-[![📱 Android-App](https://img.shields.io/badge/%F0%9F%93%B1%20Android--App-APK%20herunterladen-brightgreen?style=for-the-badge)](https://github.com/kaysiebke-cell/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/app/ritzel-generator.apk)
+[![📱 Android-App](https://img.shields.io/badge/%F0%9F%93%B1%20Android--App-APK%20herunterladen-brightgreen?style=for-the-badge)](https://github.com/nullforge86/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/app/ritzel-generator.apk)
 
 Die App bringt alles mit und läuft ohne Netz – [Anleitung zur Installation](APK-HERUNTERLADEN.md).
 
@@ -50,9 +50,9 @@ Dieses Tool erzeugt parametrische **Umlenkrollen und Führungsritzel für den or
 
 ## Schnellstart
 
-1. **Web:** [Konfigurator öffnen](https://kaysiebke-cell.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/) – Werte eintragen, STL oder STEP laden.
+1. **Web:** [Konfigurator öffnen](https://nullforge86.github.io/gates-cdx-kettenspanner-ritzel-generator-brompton/) – Werte eintragen, STL oder STEP laden.
 2. **Linux-App:** `linux/bauen-deb.sh` ausführen, dann `sudo apt install ./linux/dist/ritzel-generator_*_all.deb` → „Ritzel-Generator“ im Menü. → [Details](docs/de/linux-app.md)
-3. **Android:** [APK herunterladen](https://github.com/kaysiebke-cell/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/app/ritzel-generator.apk) und installieren. → [Details](docs/de/android.md)
+3. **Android:** [APK herunterladen](https://github.com/nullforge86/gates-cdx-kettenspanner-ritzel-generator-brompton/releases/download/app/ritzel-generator.apk) und installieren. → [Details](docs/de/android.md)
 4. **FreeCAD:** Projektordner kopieren, `freecad/main.py` als Makro starten – das Bedienfeld „Zahnrad Setup“ dockt rechts an. → [Details](docs/de/freecad.md)
 
 ---
