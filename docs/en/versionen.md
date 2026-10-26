@@ -14,7 +14,7 @@ All four versions produce the same sprocket. They differ in **where they run** a
 | 3D preview | yes | yes | yes | in the FreeCAD window |
 | Fillets | approximated | approximated | approximated | **exact (CAD)** |
 | STL export | yes (ZIP with guard) | yes | yes | yes (via "Fertigteil") |
-| STEP export | yes: ready-made files for 12–19 teeth, custom values via cloud build (about 2–3 min.) | as web | **no** (needs a CAD program anyway) | yes (via "Fertigteil") |
+| STEP export | yes: ready-made files for 12–19 teeth, custom values via cloud build (about 2–3 min.) | yes: **built locally with FreeCAD**, any values, no internet (FreeCAD must be installed) | **no** (needs a CAD program anyway) | yes (via "Fertigteil") |
 | Belt guide Ø `0` | automatic | automatic | automatic | automatic |
 | Belt guide width `0` | no ring | no ring | no ring | no ring |
 

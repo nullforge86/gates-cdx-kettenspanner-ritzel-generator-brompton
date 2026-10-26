@@ -36,18 +36,18 @@ Nicht mischen — Web, Android, Linux-App und FreeCAD sind verschiedene Dinge.
 - **Aussehen (Web + Android):** `web/css/style.css` ahmt das GTK-Design von Linux Mint nach — dunkel = Mint-L-Dark, hell = Mint-L (Farben aus `/usr/share/themes/Mint-L*/gtk-3.0`). Reiter als verbundene Knopfgruppe (aktiv = Auswahlfarbe `--accent`), Rahmen mit Titel darüber, Drehfelder mit − und + (`spinFeld` in `web/js/fields.js`), Hauptknopf grün (`--primary`). Die Linux-App selbst folgt dem echten GTK-Theme des Systems.
 - **Web-Dateien:** `web/index.html`, `web/js/*.js` (Quellen), `web/js/*.bundle.js` (**generiert, nicht in Git**, `npm run build`).
 - **Android:** `android/app/src/main/java/.../MainActivity.kt` (Download-Brücke `AndroidDownload`), `android/app/build.gradle`. Debug-APK: `cd android && ./gradlew assembleDebug`.
-- **Linux-App:** `linux/ritzel-generator.py`, Paket bauen mit `linux/bauen-deb.sh` → `linux/dist/*.deb` (nicht in Git).
+- **Linux-App:** `linux/ritzel-generator.py` (STEP lokal: `linux/step_lokal.py`, Test `python3 -m unittest discover -s linux`), Paket bauen mit `linux/bauen-deb.sh` → `linux/dist/*.deb` (nicht in Git).
 - **FreeCAD-Starter:** `linux/freecad-starter/` (Doppelklick-Datei, startet FreeCAD mit `freecad/main.py`).
 - **STEP-Vermittler (Cloud-Bau auf Zuruf):** `worker/` (Cloudflare Worker) — läuft seit 2026-10-06 wieder (neu deployt, `STEP_API` in `web/js/config.js` zeigt darauf; Token siehe Erinnerung unten).
 - **CI:** `pages.yml` (Web veröffentlichen), `android.yml` (APK), `build-ritzel.yml` (Körper bauen), `release-serie.yml` (Release 12–19 Zähne), `pruefen.yml` + `bau-pruefen.yml` (Prüfungen im PR).
 - **Doku:** `README.de.md` / `README.md` (kurzer Überblick mit den 4 Versionen), Details in `docs/de/` und `docs/en/` (je eine Seite pro Version plus Speichen, Lager, 3D-Druck, Projektstruktur, Rechtliches), `APK-HERUNTERLADEN.md` (Android). Aufbau nach dem Muster von `kaysiebke-cell/FreeCAD_MultiAI_Panel`. Die Seiten `docs/*/3d-druck.md` werden aus `web/js/print-data.js` erzeugt (`npm run docs`) — nicht von Hand ändern. Bilder in `bilder/` (`ansicht-*.png` = Ansichten der vier Versionen).
 
-## Unterschiede im Verhalten (Stand 2026-10-06)
+## Unterschiede im Verhalten (Stand 2026-10-26)
 
 | | Web | Android | Linux-App | FreeCAD |
 |---|---|---|---|---|
-| STEP-Button | ja (Standardwerte: fertige Release-ZIP; eigene Werte: Cloud-Bau) | **nein, ausgeblendet** (`window.AndroidDownload`) | ja | gibt es nicht (Export über „Fertigteil“) |
-| STEP für eigene Werte per Cloud | ja (Worker `ritzel-step`, ca. 2–3 Min) | – | ja | – |
+| STEP-Button | ja (Standardwerte: fertige Release-ZIP; eigene Werte: Cloud-Bau) | **nein, ausgeblendet** (`window.AndroidDownload`) | ja, **baut immer lokal mit FreeCAD** (`linux/step_lokal.py` → `freecad/build_headless.py`), kein Release, keine Cloud | gibt es nicht (Export über „Fertigteil“) |
+| STEP für eigene Werte per Cloud | ja (Worker `ritzel-step`, ca. 2–3 Min) | – | **nein**, lokal mit FreeCAD (Flatpak `org.freecad.FreeCAD` oder `freecadcmd`) | – |
 | Download STL/ZIP | Browser-Download | Brücke → `Downloads` | WebKit → `~/Downloads` | Export im Programm |
 | Verrundungen | genähert | genähert | genähert | exakt (CAD) |
 | Riemenführung Ø `0` | **automatisch** (Zahnkranz − 1,1 mm) | automatisch | automatisch | automatisch |
