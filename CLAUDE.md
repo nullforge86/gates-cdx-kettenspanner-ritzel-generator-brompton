@@ -56,15 +56,9 @@ Nicht mischen — Web, Android, Linux-App und FreeCAD sind verschiedene Dinge.
 
 Pflege dieser Tabelle: bei jeder Änderung, die nur eine Version betrifft, hier eintragen.
 
-## ⚠️ Erinnerung: STEP-Token läuft ab (2027-01-04)
+## STEP-Cloud-Build deaktiviert
 
-Der STEP-Bau für eigene Werte (Web) läuft über den Cloudflare-Worker `ritzel-step`
-(`https://ritzel-step.kaysiebke.workers.dev`, Code in `worker/`). Er nutzt ein GitHub-Token
-(fein abgestuft, Name `ritzel-step`, Actions: Read and write, Contents: Read-only) als Secret `GITHUB_TOKEN`.
-**Bei Problemen mit dem STEP-Button/-Bau in der Web-Version zuerst den Nutzer auf dieses Token hinweisen.**
-Erneuern: neues Token anlegen, dann im Ordner `worker/` `npx wrangler secret put GITHUB_TOKEN`
-(Wert nur im Terminal des Nutzers). Kein Redeploy nötig. Das GitHub-Konto hat 2FA-Probleme
-(alte Telefonnummer, keine Recovery-Codes) — Zugang rechtzeitig prüfen.
+Der Cloud-Build fuer individuelle STEP-Dateien ist in der Web-Version deaktiviert (`STEP_API = ''`), weil der bisherige Worker nicht erreichbar war. STL-Downloads und vorgefertigte STEP-Dateien aus den GitHub-Releases bleiben verfuegbar. `STEP_API` erst nach erfolgreichem Deployment eines erreichbaren Workers wieder setzen.
 
 ## Regeln für die Zusammenarbeit
 
