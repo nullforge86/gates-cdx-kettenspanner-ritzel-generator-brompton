@@ -11,6 +11,7 @@ Ein richtiges **GTK-Programm** für Linux Mint/Cinnamon. Formular, Reiter und Kn
 - Die Berechnung übernimmt dieselbe Logik wie in der Web-Version. Sie läuft im Hintergrund, die Oberfläche liest ihre Felder daraus. Nur die 3D-Vorschau ist eine WebView.
 - Reiter Ritzel, Spannrolle, Druck-Empfehlungen · Sprache DE/EN · Erklärungen ein/aus.
 - Downloads (ZIP mit STL, STEP) landen in `~/Downloads`.
+- **STEP baut die App lokal mit FreeCAD**, mit derselben Baulogik wie die FreeCAD-Version (`freecad/build_headless.py`): kein Internet, kein Cloud-Dienst, beliebige Werte, Ritzel + Bügel oder Spannrolle. Dafür muss FreeCAD installiert sein, z. B. `flatpak install flathub org.freecad.FreeCAD`. Mit Verrundungen dauert ein Bau einige Minuten; der Knopf bricht ihn währenddessen auf Wunsch ab. Bei einem Fehler steht das Protokoll in `~/.cache/ritzel-generator/letzter-step-bau.log`.
 - Ein zweiter Start holt das vorhandene Fenster nach vorn.
 
 **Installieren** (Paket bauen und einspielen, im Projektordner):

@@ -11,6 +11,7 @@ A real **GTK program** for Linux Mint/Cinnamon. Form, tabs and buttons are genui
 - The calculation uses the same logic as the web version. It runs in the background and the interface reads its fields from it. Only the 3D preview is a web view.
 - Tabs Sprocket, Idler roller, Print guide · language DE/EN · explanations on/off.
 - Downloads (ZIP with STL, STEP) end up in `~/Downloads`.
+- **STEP is built locally with FreeCAD**, using the same build logic as the FreeCAD version (`freecad/build_headless.py`): no internet, no cloud service, any values, sprocket + guard or idler roller. FreeCAD must be installed, e.g. `flatpak install flathub org.freecad.FreeCAD`. With fillets a build takes a few minutes; the button can cancel it meanwhile. On failure the log is in `~/.cache/ritzel-generator/letzter-step-bau.log`.
 - A second start brings the existing window to the front.
 
 **Install** (build the package and install it, in the project folder):

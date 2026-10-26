@@ -14,7 +14,7 @@ Alle vier Versionen erzeugen dasselbe Ritzel. Sie unterscheiden sich darin, **wo
 | 3D-Vorschau | ja | ja | ja | im FreeCAD-Fenster |
 | Verrundungen | angenähert | angenähert | angenähert | **exakt (CAD)** |
 | STL-Export | ja (ZIP mit Bügel) | ja | ja | ja (über „Fertigteil“) |
-| STEP-Export | ja: fertige Dateien für 12–19 Zähne, eigene Werte per Cloud-Bau (ca. 2–3 Min.) | wie Web | **nein** (braucht ohnehin ein CAD-Programm) | ja (über „Fertigteil“) |
+| STEP-Export | ja: fertige Dateien für 12–19 Zähne, eigene Werte per Cloud-Bau (ca. 2–3 Min.) | ja: **lokal mit FreeCAD**, alle Werte, ohne Internet (FreeCAD muss installiert sein) | **nein** (braucht ohnehin ein CAD-Programm) | ja (über „Fertigteil“) |
 | Riemenführung Ø `0` | automatisch | automatisch | automatisch | automatisch |
 | Riemenführung Breite `0` | kein Ring | kein Ring | kein Ring | kein Ring |
 

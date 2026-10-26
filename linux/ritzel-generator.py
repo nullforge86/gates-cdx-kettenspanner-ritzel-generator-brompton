@@ -11,24 +11,33 @@ diese Oberfläche ruft sie auf: Die Felder liest die Oberfläche aus der Seite
 aus (so gibt es nur EINE Quelle: params.json), Änderungen schreibt sie dorthin
 zurück, Geometrie, STL-Export und STEP-Bau bleiben unverändert.
 
+STEP baut die App lokal mit dem installierten FreeCAD (step_lokal.py,
+freecad/build_headless.py) — ohne Internet, ohne Cloud-Dienst und ohne
+GitHub-Release. Die STEP-Knöpfe der Seite (Release-Download, Cloud-Bau)
+werden darum hier nie angeklickt.
+
 Dieselbe Bauweise wie linux-native/ in der Schreibhilfe.
 """
 import functools
 import http.server
 import json
 import os
+import shutil
 import sys
 import threading
+import time
 from urllib.parse import urlparse
 
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 gi.require_version('WebKit2', '4.1')
-from gi.repository import Gtk, Gdk, GLib, WebKit2   # noqa: E402
+from gi.repository import Gtk, Gdk, Gio, GLib, WebKit2   # noqa: E402
 
 TITEL = 'Gates CDX Riemenspanner-Ritzel Generator'
 HIER = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HIER)
+import step_lokal   # noqa: E402
 
 # Alles außer dem Zeichenbereich der Seite ausblenden — die Bedienung
 # übernimmt diese Oberfläche.
@@ -79,28 +88,64 @@ JS_ZUSTAND = """(function(){
   const t = id => g(id) ? g(id).textContent.trim() : '';
   const hint = id => ({v: vis(g(id)), t: t(id), always: !!g(id) && g(id).className.indexOf('hint') < 0});
   return JSON.stringify({
-    ready: !!window.__ritzelRebuild && !g('loader') && t('stats') !== '',
-    stats: t('stats'), stl: t('stlbtn'),
+    ready: !!document.querySelector('#form fieldset:not([hidden]) .row input'),
+    stats: t('stats'), loader: t('loader'), stl: t('stlbtn'),
     step: {v: vis(g('stepbtn')), t: t('stepbtn')}, stephint: hint('stephint'),
     build: {v: vis(g('stepbuildbtn')), t: t('stepbuildbtn'), dis: !!g('stepbuildbtn') && g('stepbuildbtn').disabled},
     buildhint: hint('stepbuildhint'), status: hint('stepbuildstatus'),
     buegel: {v: !!g('buegelrow') && !g('buegelrow').hidden, t: t('buegellbl'), c: !!g('buegelchk') && g('buegelchk').checked},
     tabs: [t('tab-gen'), t('tab-rolle'), t('tab-print')],
+    sprache: document.documentElement.lang || 'de',
     lang: t('lang-toggle'), hintson: document.body.classList.contains('hinweise'),
     hintsbtn: g('hintsbtn') ? g('hintsbtn').title : ''
   });
 })()"""
 
 
+# Eingaben fürs lokale STEP so, wie params() in web/js/fields.js sie liest:
+# nur das sichtbare Bauteil, Zähne ganzzahlig und in den Grenzen. Felder, die
+# das Formular nicht zeigt, ergänzt build_headless.py aus params.json.
+JS_PARAMS = """(function(){
+  const p = {};
+  document.querySelectorAll('#form fieldset:not([hidden]) .row input[type=number]').forEach(i => {
+    const v = parseFloat(i.value);
+    if (Number.isFinite(v)) p[i.id] = v;
+  });
+  const z = document.getElementById('zaehne');
+  if (z && !z.closest('fieldset').hidden && 'zaehne' in p) {
+    let v = Math.round(p.zaehne);
+    if (z.min !== '') v = Math.max(parseFloat(z.min), v);
+    if (z.max !== '') v = Math.min(parseFloat(z.max), v);
+    p.zaehne = v;
+  }
+  return JSON.stringify(p);
+})()"""
+
+NEGATIV_ERLAUBT = {'speichen_schwung'}
+
+BUNDLES = ('index.html', 'js/shell.bundle.js', 'js/viewer.bundle.js')
+
+
 def finde_web():
     # Reihenfolge: ausdrücklich gesetzt, dann das Projekt neben diesem Skript
-    # (Start aus dem Quellordner), zuletzt die installierte Kopie.
+    # (Start aus dem Quellordner), zuletzt die installierte Kopie. Ein
+    # Quellordner ohne gebaute Bundles zählt nicht: dort bliebe das Fenster leer.
     for p in (os.environ.get('RITZEL_WEB'),
               os.path.join(HIER, '..', 'web'),
               '/usr/share/ritzel-generator/web'):
-        if p and os.path.isfile(os.path.join(p, 'index.html')):
+        if p and all(os.path.isfile(os.path.join(p, b)) for b in BUNDLES):
             return os.path.abspath(p)
-    sys.exit('web/index.html nicht gefunden')
+    return None
+
+
+def startfehler(text):
+    print(text, file=sys.stderr)
+    d = Gtk.MessageDialog(message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.CLOSE,
+                          text='Ritzel-Generator kann nicht starten')
+    d.format_secondary_text(text)
+    d.run()
+    d.destroy()
+    return 1
 
 
 def finde_icon():
@@ -125,6 +170,13 @@ def starte_server(verzeichnis):
     srv = http.server.ThreadingHTTPServer(('127.0.0.1', 0), handler)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     return srv.server_address[1]
+
+
+def downloads():
+    ordner = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD) \
+        or os.path.expanduser('~')
+    os.makedirs(ordner, exist_ok=True)
+    return ordner
 
 
 def freier_name(ordner, name):
@@ -163,6 +215,11 @@ class App(Gtk.Window):
         self.hinweis_labels = []
         self.fertig = False
         self.druck_html = None
+        self.fehlgeschlagen = set()   # Downloads, die „failed“ gemeldet haben
+        self.freecad = step_lokal.finde_freecad()
+        self.freecad_quellen = step_lokal.finde_freecad_quellen()
+        self.bau = None               # laufender lokaler STEP-Bau
+        self.connect('destroy', self.aufraeumen)
         self.set_default_size(1320, 840)
         self.set_icon_name('ritzel-generator')
         icon = finde_icon()
@@ -192,6 +249,7 @@ class App(Gtk.Window):
             if erster is None:
                 erster = b
             b.connect('toggled', self.reiter_gewechselt, name)
+            b.set_sensitive(False)        # erst, wenn die Seite das Formular gebaut hat
             box.pack_start(b, False, False, 0)
             self.reiter[name] = b
         bar.set_custom_title(box)
@@ -245,14 +303,17 @@ class App(Gtk.Window):
         self.stl_btn = Gtk.Button(label='ZIP herunterladen')
         self.stl_btn.get_style_context().add_class('suggested-action')
         self.stl_btn.connect('clicked', lambda *_: self.klick('stlbtn'))
+        # Beide STEP-Knöpfe bauen lokal mit FreeCAD: „STEP-ZIP herunterladen“
+        # (Standardwerte) und „STEP für diese Werte bauen“ (eigene Werte, Rolle).
         self.step_btn = Gtk.Button(label='STEP herunterladen')
-        self.step_btn.connect('clicked', lambda *_: self.klick('stepbtn'))
+        self.step_btn.connect('clicked', self.lokal_klick)
         self.build_btn = Gtk.Button(label='STEP bauen')
-        self.build_btn.connect('clicked', lambda *_: self.klick('stepbuildbtn'))
+        self.build_btn.connect('clicked', self.lokal_klick)
         self.step_hint = self.neues_hinweislabel()
         self.build_hint = self.neues_hinweislabel()
         self.status = Gtk.Label(xalign=0, wrap=True)
         self.status.get_style_context().add_class('dim-label')
+        self.status.set_selectable(True)
         for w in (self.buegel_chk, self.stl_btn, self.step_btn, self.step_hint,
                   self.build_btn, self.build_hint, self.status):
             unten.pack_start(w, False, False, 0)
@@ -302,9 +363,12 @@ class App(Gtk.Window):
                 lab.set_hexpand(True)
                 step = r['step']
                 stellen = len(f'{step:.6f}'.rstrip('0').split('.')[1]) if '.' in f'{step:.6f}'.rstrip('0') else 0
-                lo = r['min'] if r['min'] is not None else -1e6
+                # Ohne Grenze aus der Seite: Maße und Anzahlen sind nie negativ,
+                # nur der Speichen-Schwung (Winkel) darf es sein.
+                lo = r['min'] if r['min'] is not None else (-1e6 if r['id'] in NEGATIV_ERLAUBT else 0)
                 hi = r['max'] if r['max'] is not None else 1e6
-                adj = Gtk.Adjustment(value=r['value'], lower=lo, upper=hi, step_increment=step, page_increment=step * 10)
+                wert = r['value'] if isinstance(r['value'], (int, float)) and r['value'] == r['value'] else lo
+                adj = Gtk.Adjustment(value=wert, lower=lo, upper=hi, step_increment=step, page_increment=step * 10)
                 spin = Gtk.SpinButton(adjustment=adj, digits=max(stellen, 1 if step < 1 else 0))
                 spin.set_width_chars(7)
                 spin.set_alignment(1.0)
@@ -343,6 +407,8 @@ class App(Gtk.Window):
 
     def wert_geaendert(self, spin, feld_id):
         wert = spin.get_value()
+        if self.bau is None:
+            self.setze_status('')         # alte STEP-Meldung passt nicht mehr zu den Werten
         js(self.web, f"""(function(id,v){{var i=document.getElementById(id); if(!i) return '';
             i.value=v; i.dispatchEvent(new Event('input',{{bubbles:true}}));
             i.dispatchEvent(new Event('change',{{bubbles:true}})); return '';}})({js_text(feld_id)},{wert})""")
@@ -362,6 +428,8 @@ class App(Gtk.Window):
         if not knopf.get_active() or not self.fertig:
             return
         self.bauteil = name
+        if self.bau is None:
+            self.setze_status('')         # Meldung des letzten STEP-Baus gehört zum alten Reiter
         if name == 'print':
             self.stack.set_visible_child_name('print')
             self.hinweis_btn.set_sensitive(False)
@@ -403,19 +471,15 @@ class App(Gtk.Window):
         erstmals = z['ready'] and not self.fertig
         if erstmals:
             self.fertig = True
+            for knopf in self.reiter.values():
+                knopf.set_sensitive(True)
             self.formular_lesen()
             self.druck_laden()
-        self.stats.set_text(z['stats'])
+        # Solange die 3D-Vorschau lädt (oder nicht laden kann), steht ihr
+        # Ladezustand oben — das Formular ist trotzdem schon bedienbar.
+        self.stats.set_text(z['stats'] or z['loader'])
         self.stl_btn.set_label(z['stl'].lstrip('💾 ').strip() or 'ZIP herunterladen')
-        for knopf, d in ((self.step_btn, z['step']), (self.build_btn, z['build'])):
-            knopf.set_visible(d['v'])
-            knopf.set_label(d['t'].lstrip('📐 ').strip())
-        self.build_btn.set_sensitive(not z['build']['dis'])
-        for label, d in ((self.step_hint, z['stephint']), (self.build_hint, z['buildhint'])):
-            label.set_text(d['t'])
-            label.set_visible(d['v'] and d['t'] != '' and (d['always'] or self.hinweise_an))
-        self.status.set_text(z['status']['t'])
-        self.status.set_visible(z['status']['v'] and z['status']['t'] != '')
+        self.step_zustand(z)
         self.buegel_chk.set_visible(z['buegel']['v'] and self.bauteil == 'gen')
         self.buegel_chk.set_label(z['buegel']['t'])
         self._sperre = True
@@ -435,7 +499,11 @@ class App(Gtk.Window):
             u = urlparse(uri)
             if u.scheme in ('http', 'https') and u.hostname != '127.0.0.1':
                 decision.ignore()
-                Gtk.show_uri_on_window(self, uri, Gdk.CURRENT_TIME)
+                try:
+                    Gtk.show_uri_on_window(self, uri, Gdk.CURRENT_TIME)
+                except GLib.Error as e:
+                    self.meldung(f'Link konnte nicht geöffnet werden:\n{uri}\n\n{e.message}',
+                                 Gtk.MessageType.ERROR)
                 return True
         return False
 
@@ -445,12 +513,10 @@ class App(Gtk.Window):
         download.connect('failed', self.on_fehler)
 
     def on_ziel(self, download, vorschlag):
-        ordner = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD) \
-            or os.path.expanduser('~')
-        os.makedirs(ordner, exist_ok=True)
-        pfad = freier_name(ordner, vorschlag or 'download')
-        download.set_destination('file://' + pfad)
-        download._ziel = pfad
+        pfad = freier_name(downloads(), vorschlag or 'download')
+        # Ziel als URI: Leerzeichen und Sonderzeichen müssen kodiert sein,
+        # sonst scheitert z. B. „datei (1).zip“.
+        download.set_destination(GLib.filename_to_uri(pfad, None))
         return True
 
     def meldung(self, text, art=Gtk.MessageType.INFO):
@@ -460,18 +526,169 @@ class App(Gtk.Window):
         d.show()
 
     def on_fertig(self, download):
-        ziel = getattr(download, '_ziel', None)
+        # WebKit meldet „finished“ auch nach einem Fehler (nach „failed“).
+        if download in self.fehlgeschlagen:
+            self.fehlgeschlagen.discard(download)
+            return
+        ziel = download.get_destination()
         if ziel:
-            self.meldung(f'Gespeichert unter:\n{ziel}')
+            self.meldung(f'Gespeichert unter:\n{GLib.filename_from_uri(ziel)[0]}')
 
     def on_fehler(self, download, fehler):
+        self.fehlgeschlagen.add(download)
         self.meldung(f'Download fehlgeschlagen: {fehler.message}', Gtk.MessageType.ERROR)
+
+    # ── STEP lokal mit FreeCAD bauen ────────────────────────────────
+    def lokal_moeglich(self):
+        return self.freecad is not None and self.freecad_quellen is not None
+
+    def step_zustand(self, z):
+        """Die STEP-Knöpfe folgen der Seite nur darin, OB Standardwerte
+        vorliegen (dann zeigt sie den Release-Knopf). Gebaut wird immer lokal;
+        Cloud-Status und „nur für Standardwerte“-Hinweise der Seite gelten hier nicht."""
+        de = z['sprache'] != 'en'
+        standard = z['step']['v'] and self.bauteil == 'gen'
+        sichtbar = self.bauteil != 'print'
+        self.step_btn.set_visible(sichtbar and standard)
+        self.build_btn.set_visible(sichtbar and not standard)
+        if self.bau is None:
+            self.step_btn.set_label(z['step']['t'].lstrip('📐 ').strip() or 'STEP')
+            self.build_btn.set_label('STEP für diese Werte bauen' if de else 'Build STEP for these values')
+        for knopf in (self.step_btn, self.build_btn):
+            knopf.set_sensitive(self.lokal_moeglich() or self.bau is not None)
+        if self.lokal_moeglich():
+            erklaerung = (f'Exakter CAD-Körper, lokal gebaut mit FreeCAD ({step_lokal.beschreibe(self.freecad)}), '
+                          'ohne Internet. Mit Verrundungen dauert das einige Minuten.' if de else
+                          f'Exact CAD body, built locally with FreeCAD ({step_lokal.beschreibe(self.freecad)}), '
+                          'no internet needed. With fillets this takes a few minutes.')
+            dauernd = False
+        elif self.freecad_quellen is None:
+            erklaerung = ('STEP nicht möglich: Die FreeCAD-Bau-Skripte (freecad/) fehlen.' if de else
+                          'STEP not possible: the FreeCAD build scripts (freecad/) are missing.')
+            dauernd = True
+        else:
+            erklaerung = (('STEP braucht FreeCAD. Installieren mit:\n' if de else
+                           'STEP needs FreeCAD. Install it with:\n')
+                          + f'flatpak install flathub {step_lokal.FLATPAK_ID}')
+            dauernd = True
+        aktiv = self.step_hint if standard else self.build_hint
+        anderer = self.build_hint if standard else self.step_hint
+        anderer.set_visible(False)
+        aktiv.set_text(erklaerung)
+        aktiv.set_visible(sichtbar and (dauernd or self.hinweise_an))
+        if self.bau is None and not self.status.get_text():
+            self.status.set_visible(False)
+
+    def setze_status(self, text):
+        self.status.set_text(text)
+        self.status.set_visible(bool(text))
+
+    def lokal_klick(self, *_):
+        if self.bau is not None:
+            self.bau['abgebrochen'] = True
+            self.bau['proc'].force_exit()
+            return
+        if not self.lokal_moeglich():
+            return
+        js(self.web, JS_PARAMS, self.lokal_starten)
+
+    def lokal_starten(self, text):
+        if not text or self.bau is not None:
+            return
+        params = json.loads(text)
+        if self.bauteil == 'rolle':
+            params['bauteil'] = 'rolle'
+        try:
+            arbeit = step_lokal.bereite_arbeit(
+                self.freecad_quellen, os.path.join(GLib.get_user_cache_dir(), 'ritzel-generator'))
+            argv, env = step_lokal.befehl(self.freecad, arbeit, params)
+            launcher = Gio.SubprocessLauncher.new(
+                Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_MERGE)
+            # stdin leer: freecadcmd soll nach dem Skript nicht auf Eingaben warten.
+            launcher.set_stdin_file_path(os.devnull)
+            for k, v in env.items():
+                launcher.setenv(k, v, True)
+            launcher.set_cwd(arbeit)
+            proc = launcher.spawnv(argv)
+        except (OSError, GLib.Error) as e:
+            self.meldung(f'FreeCAD konnte nicht gestartet werden:\n{e}', Gtk.MessageType.ERROR)
+            return
+        self.bau = {'proc': proc, 'arbeit': arbeit, 'params': params,
+                    'start': time.monotonic(), 'abgebrochen': False}
+        for knopf in (self.step_btn, self.build_btn):
+            knopf.set_label('STEP-Bau abbrechen')
+        self.lokal_takt()
+        GLib.timeout_add_seconds(1, self.lokal_takt)
+        proc.communicate_utf8_async(None, None, self.lokal_ausgabe, self.bau)
+
+    def lokal_ausgabe(self, proc, res, bau):
+        try:
+            bau['ausgabe'] = proc.communicate_utf8_finish(res)[1]
+        except GLib.Error as e:
+            bau['ausgabe'] = str(e)
+        proc.wait_async(None, self.lokal_fertig, bau)   # erst nach Prozessende auswerten
+
+    def lokal_takt(self):
+        if self.bau is None:
+            return False
+        s = int(time.monotonic() - self.bau['start'])
+        self.setze_status(f'FreeCAD baut den CAD-Körper … {s // 60}:{s % 60:02d}')
+        return True
+
+    def lokal_fertig(self, proc, res, bau):
+        try:
+            proc.wait_finish(res)
+        except GLib.Error:
+            pass
+        ausgabe = bau.get('ausgabe') or ''
+        if self.bau is bau:
+            self.bau = None
+        if not self.get_realized():         # Fenster schon zu: nur aufräumen
+            shutil.rmtree(bau['arbeit'], ignore_errors=True)
+            return
+        self.abfragen()                     # Knopf-Beschriftungen zurücksetzen
+        try:
+            if bau['abgebrochen']:
+                self.setze_status('STEP-Bau abgebrochen.')
+                return
+            ziel = freier_name(downloads(), step_lokal.dateiname(bau['params']))
+            dateien = step_lokal.packe_step(bau['arbeit'], ziel)
+            if proc.get_if_exited() and proc.get_exit_status() == 0 and dateien:
+                self.setze_status('STEP gespeichert: ' + os.path.basename(ziel))
+                self.meldung(f'STEP gespeichert unter:\n{ziel}')
+                return
+            if dateien:                      # Teil gebaut, aber Fehlercode: nicht weitergeben
+                os.remove(ziel)
+            log = os.path.join(GLib.get_user_cache_dir(), 'ritzel-generator', 'letzter-step-bau.log')
+            with open(log, 'w', encoding='utf-8') as f:
+                f.write(ausgabe or '')
+            self.setze_status('STEP-Bau fehlgeschlagen.')
+            self.meldung('STEP-Bau mit FreeCAD fehlgeschlagen.\n\n'
+                         f'{step_lokal.letzte_zeilen(ausgabe)}\n\nVollständiges Protokoll:\n{log}',
+                         Gtk.MessageType.ERROR)
+        except OSError as e:
+            self.meldung(f'STEP konnte nicht gespeichert werden:\n{e}', Gtk.MessageType.ERROR)
+        finally:
+            shutil.rmtree(bau['arbeit'], ignore_errors=True)
+
+    def aufraeumen(self, *_):
+        # Fenster zu während eines Baus: FreeCAD beenden, Arbeitsordner weg
+        # (die Hauptschleife endet gleich, lokal_fertig käme nicht mehr dran).
+        if self.bau is not None:
+            self.bau['abgebrochen'] = True
+            self.bau['proc'].force_exit()
+            shutil.rmtree(self.bau['arbeit'], ignore_errors=True)
 
 
 def main():
     GLib.set_prgname('ritzel-generator')
     GLib.set_application_name(TITEL)
-    port = starte_server(finde_web())
+    web = finde_web()
+    if web is None:
+        return startfehler('Die Oberfläche (web/ mit shell.bundle.js und viewer.bundle.js) fehlt.\n'
+                           'Im Projektordner zuerst bauen:  npm install && npm run build:shell '
+                           '&& npm run build:viewer\noder das Paket neu installieren.')
+    port = starte_server(web)
     app = Gtk.Application(application_id='de.ritzelgenerator.native')
     app.fenster = None
 
